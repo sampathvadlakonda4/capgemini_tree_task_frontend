@@ -35,6 +35,7 @@ function createRect(obj, initial, xPos) {
         .attr("height", rectheight.value)
         .attr('fill', 'white')
         .attr('class', 'curvedRect')
+        .style('cursor', 'pointer')
         .on('click', function (d) {
             removeActiveClasses()
             this.classList.add('active')
@@ -163,6 +164,7 @@ onMounted(async () => {
     font-size: 10px;
     border: 1px solid;
     border-radius: 2px;
+    cursor: pointer;
 }
 .noRecords{
     color: red;
