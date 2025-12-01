@@ -110,13 +110,16 @@ onMounted(async () => {
         svg.attr("height");
         setOrResetYPositiontoMiddle();
         // first level
-        let intialData = data.value.filter(each => !each.parent)
-        createNodes(intialData, true, xPosition)
+        if(data.value){
+            let intialData = data.value?.filter(each => !each.parent)
+            createNodes(intialData, true, xPosition)
+        }
     }
 })
 </script>
 <template>
     <section class="container">
+        <div v-show="!data?.length" class="noRecords"> No records found </div>
         <div v-if="activeNode" class="activeNodeContainer">
             <button class="removeButton" @click="removeActiveClasses">X</button>
             <strong>{{ activeNode?.name }}</strong>
@@ -160,5 +163,8 @@ onMounted(async () => {
     font-size: 10px;
     border: 1px solid;
     border-radius: 2px;
+}
+.noRecords{
+    color: red;
 }
 </style>
