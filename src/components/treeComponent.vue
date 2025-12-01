@@ -36,6 +36,7 @@ function createRect(obj, initial, xPos) {
         .attr('fill', 'white')
         .attr('class', 'curvedRect')
         .on('click', function (d) {
+            removeActiveClasses()
             this.classList.add('active')
             activeNode.value = obj;
         });

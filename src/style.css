@@ -29,3 +29,7 @@ body {
     background-color: #ffffff;
   }
 }
+.active{
+    stroke: green;
+    stroke-width: 5;
+}
