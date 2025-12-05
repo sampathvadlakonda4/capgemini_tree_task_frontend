@@ -126,13 +126,14 @@ onMounted(async () => {
 <template>
     <section class="container">
         <div v-show="!data?.length && !loadingData" class="noRecords"> No records found </div>
-        <div v-if="loadingData" class="loadingData"> Loading... </div>
         <div v-if="activeNode" class="activeNodeContainer">
             <button class="removeButton" @click="removeActiveClasses">X</button>
             <strong>{{ activeNode?.name }}</strong>
             <p>{{ activeNode?.description }}</p>
         </div>
-        <div class="svgContainer" ref="svgContainer"></div>
+        <div class="svgContainer" ref="svgContainer">
+            <div v-if="loadingData" class="loadingData"> Loading... </div>
+        </div>
     </section>
 </template>
 <style scoped>
@@ -167,7 +168,8 @@ onMounted(async () => {
     top: 5px;
     right: 5px;
     display: flex;
-    place-items: center;
+    justify-content: center;
+    align-items: center;
     font-size: 10px;
     border: 1px solid;
     border-radius: 2px;
@@ -175,5 +177,12 @@ onMounted(async () => {
 }
 .noRecords{
     color: red;
+}
+.loadingData{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>
