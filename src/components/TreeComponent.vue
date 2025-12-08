@@ -7,10 +7,12 @@ const data = ref([])
 const activeNode = ref(null)
 const rectWidth = ref(100);
 const rectheight = ref(80);
+const loadingData = ref(false);
 let svg = null;
 let xPosition = 50;
 let yPosition = 50;
 let horizontalSpace = 30;
+let verticalSpace = 30;
 function removeActiveClasses() {
     d3.selectAll('.active').classed('active', false);
     activeNode.value = null;
@@ -25,9 +27,10 @@ function addLinePlot(lineData, group) {
         .attr('stroke', 'white')
         .attr('stroke-width', 1);
 }
-function createRect(obj, initial, xPos) {
-    let xValue = xPos
-    let group = svg.append('g').attr("transform", `translate(${xValue},${yPosition})`);
+function createRect(obj, initial, xPos, yPos) {
+    let xValue = xPos;
+    let yValue = yPos;
+    let group = svg.append('g').attr("transform", `translate(${xValue},${yValue})`);
     group.append('rect')
         .attr("rx", 5)
         .attr("ry", 5)
@@ -58,7 +61,7 @@ function createRect(obj, initial, xPos) {
         addLinePlot(lineData, group)
 
         xValue += rectWidth.value + horizontalSpace;
-        createNodes(nodes, false, xValue)
+        createNodes(nodes, false, xValue, yPos)
     }
 
 
@@ -71,24 +74,25 @@ function createRect(obj, initial, xPos) {
     }
 
 }
-function createNodes(list, initial = false, xPos) {
+function createNodes(list, initial = false, xPos, yPos) {
     let xValue = xPos;
     let up = true;
     let verticalLineData = [];
     list.forEach((each, i) => {
+        let yValue = yPos;
         if (i > 0) { // setting y-position 
             if (up) {
-                yPosition -= ((rectheight.value * i) + horizontalSpace)
+                yValue -= ((rectheight.value * i) + verticalSpace)
                 up = false
             }
             else {
-                yPosition += ((rectheight.value * i) + horizontalSpace)
+                yValue += ((rectheight.value + verticalSpace) * (i/2))
                 up = true;
             }
         }
         if (!initial) {  // vertical line
             if (list.length - 2 === i || list.length - 1 === i) {
-                verticalLineData.push({ x: xValue - (horizontalSpace / 2), y: yPosition + (rectheight.value / 2) })
+                verticalLineData.push({ x: xValue - (verticalSpace / 2), y: yValue + (rectheight.value / 2) })
             }
             if (list.length - 1 === i) {
                 let g = svg.append('g')
@@ -96,8 +100,8 @@ function createNodes(list, initial = false, xPos) {
             }
         }
 
-        createRect(each, initial, xValue)
-        setOrResetYPositiontoMiddle();
+        createRect(each, initial, xValue, yValue)
+        // setOrResetYPositiontoMiddle();
     })
 }
 function setOrResetYPositiontoMiddle() {
@@ -105,28 +109,31 @@ function setOrResetYPositiontoMiddle() {
 }
 onMounted(async () => {
     if (svgContainer.value) {
+        loadingData.value = true;
         data.value = await fetchData();
+        loadingData.value = false;
         svg = d3.select(svgContainer.value)
             .append('svg').attr('width', '100%').attr('height', '100%');
-        svg.attr("height");
         setOrResetYPositiontoMiddle();
         // first level
         if(data.value){
             let intialData = data.value?.filter(each => !each.parent)
-            createNodes(intialData, true, xPosition)
+            createNodes(intialData, true, xPosition, yPosition)
         }
     }
 })
 </script>
 <template>
     <section class="container">
-        <div v-show="!data?.length" class="noRecords"> No records found </div>
+        <div v-show="!data?.length && !loadingData" class="noRecords"> No records found </div>
         <div v-if="activeNode" class="activeNodeContainer">
             <button class="removeButton" @click="removeActiveClasses">X</button>
             <strong>{{ activeNode?.name }}</strong>
             <p>{{ activeNode?.description }}</p>
         </div>
-        <div class="svgContainer" ref="svgContainer"></div>
+        <div class="svgContainer" ref="svgContainer">
+            <div v-if="loadingData" class="loadingData"> Loading... </div>
+        </div>
     </section>
 </template>
 <style scoped>
@@ -138,10 +145,11 @@ onMounted(async () => {
     width: 100vw;
     box-sizing: border-box;
     flex-direction: column;
+    position: relative;
 }
 
 .activeNodeContainer {
-    position: relative;
+    position: absolute;
     background-color: grey;
     padding: 5px;
 }
@@ -160,7 +168,8 @@ onMounted(async () => {
     top: 5px;
     right: 5px;
     display: flex;
-    place-items: center;
+    justify-content: center;
+    align-items: center;
     font-size: 10px;
     border: 1px solid;
     border-radius: 2px;
@@ -168,5 +177,12 @@ onMounted(async () => {
 }
 .noRecords{
     color: red;
+}
+.loadingData{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>
